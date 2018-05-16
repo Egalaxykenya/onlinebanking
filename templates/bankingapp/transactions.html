@@ -1,0 +1,47 @@
+{% extends 'bankingapp/baseloggedin.html' %}
+
+{% block bodycontent %}
+<h2> Funds Transfer Transactions </h2>
+<table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">Transaction ID</th>
+        <th scope="col">Amount (USD)</th>
+        <th scope="col">Recipient Name</th>
+        <th scope="col">Account #</th>
+        <th scope="col">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="table-active">
+        <td scope="row">1</th>
+        <td> 200 </td>
+        <td> Tom Dick </td>
+        <td> 112267854 </td>
+        <td> 26/01/2018 </td>
+      </tr>
+      <tr class="table-active">
+        <td scope="row">2</th>
+        <td> 200 </td>
+        <td> Tom harry </td>
+        <td> 112267854 </td>
+        <td> 26/01/2018 </td>
+      </tr>
+      <tr class="table-active">
+        <td scope="row">3</th>
+        <td> 200 </td>
+        <td> Tom Jerry </td>
+        <td> 112267854 </td>
+        <td> 26/01/2018 </td>
+      </tr>
+      <tr class="table-active">
+        <td scope="row">4</th>
+        <td> 200 </td>
+        <td> Tom Rivers </td>
+        <td> 112267854 </td>
+        <td> 26/01/2018 </td>
+      </tr>
+
+    </tbody>
+  </table>
+{% endblock %}

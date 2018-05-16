@@ -1,0 +1,34 @@
+{% extends 'bankingapp/baseloggedin.html' %}
+
+{% block bodycontent %}
+<table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">Your Bank Account Attributes</th>
+        <th scope="col">Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="table-active">
+        <th scope="row">Account Holder First Name</th>
+        <td>Busalire</td>
+      </tr>
+      <tr class="table-active">
+        <th scope="row">Account Holder Second Name</th>
+        <td>Emeka</td>
+      </tr>
+      <tr class="table-active">
+        <th scope="row">Account Type</th>
+        <td>Current Account </td>
+      </tr>
+      <tr class="table-active">
+        <th scope="row">Account Number</th>
+        <td>112234567</td>
+      </tr>
+      <tr class="table-success">
+        <th scope="row">Current Account Balance</th>
+        <td><b>USD: 40000 </b></td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}
