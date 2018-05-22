@@ -1,0 +1,35 @@
+{% extends 'bankingapp/baseloggedin.html'%}
+
+{% block bodycontent %}
+
+<div class="row">
+  <div class="col-lg-12">
+<h2> Your Account Access Logs </h2>
+<table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">Date</th>
+        <th scope="col">Time</th>
+        <th scope="col">Transaction Description</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="table-active">
+        <td scope="row">20/05/2018</th>
+        <td> 12:00 </td>
+        <td>Funds Transfer to {{ "John" }} - Account Number {{ 111222 }} </td>
+
+      </tr>
+      <tr class="table-active">
+        <td scope="row">19/05/2018</th>
+        <td> 18:00 </td>
+        <td>Utility bill payment to {{ "Tokyo Gas" }} - Account Number {{ 222222 }} </td>
+
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+{% endblock %}

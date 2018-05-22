@@ -1,0 +1,85 @@
+{% extends 'bankingapp/baseloggedin.html' %}
+
+{% block bodycontent %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="alert alert-dismissible alert-success">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong>Your Profile has been updated successfully! </strong>
+</div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-12">
+    <form>
+  <fieldset>
+    <div class="form-group">
+      <label class="col-form-label" for="userFullName">User Full Name</label>
+      <input class="form-control"  id="userFullName" name="UserFullName" type="text">
+    </div>
+    <div class="form-group">
+      <label class="col-form-label" for="userIDNum">User ID Number</label>
+      <input class="form-control"  id="userIDNum"  name="UserID" type="text">
+    </div>
+    <div class="form-group">
+      <fieldset disabled="">
+      <label class="col-form-label" for="userAccountNumber">User Account Number</label>
+      <input class="form-control" disabled="" id="userAccountNumber" name="userAccNum" type="text">
+    </fieldset>
+    </div>
+    <div class="form-group">
+      <label class="col-form-label" for="userName">Username</label>
+      <input class="form-control" id="userName" name="UserName" type="text">
+    </div>
+    <div class="form-group">
+      <label class="col-form-label" for="userEmail">User Email Address</label>
+      <input class="form-control" id="userEmail" name="UserEmail" type="text">
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Update Profile </button>
+  </fieldset>
+</form>
+
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-12">
+    <p> </p>
+  </div>
+  <div class="col-lg-12">
+    <div class="alert alert-dismissible alert-success">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong>Your Password has been updated successfully! </strong>
+</div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-12">
+    <h2> Change password </h2>
+    <form>
+  <fieldset>
+    <div class="form-group">
+      <label class="col-form-label" for="currentPassword">Current Password</label>
+      <input class="form-control"  id="currentPassword" name="CurrentPass" type="password">
+    </div>
+    <div class="form-group">
+      <label class="col-form-label" for="newPassword">New Password</label>
+      <input class="form-control"  id="newPassword"  name="newPass" type="password">
+    </div>
+    <div class="form-group">
+
+      <label class="col-form-label" for="confirmNewPass">Confirm New Password</label>
+      <input class="form-control"  id="confirmNewPass" name="ConfirmNewPass" type="password">
+
+    </div>
+
+    <button type="submit" class="btn btn-primary">Change Password </button>
+  </fieldset>
+</form>
+
+
+  </div>
+</div>
+
+{% endblock %}

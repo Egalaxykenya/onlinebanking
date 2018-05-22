@@ -82,15 +82,14 @@ WSGI_APPLICATION = 'onlinebanking.wsgi.application'
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-         'default': {
+        'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'onlinebanking',
         'USER': 'onlinebanking',
         'PASSWORD': 'this@is##dumb',
         'HOST' : '',
     }
-    }
+
 }
 
 
