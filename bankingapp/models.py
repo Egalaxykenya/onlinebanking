@@ -51,10 +51,15 @@ class UtilityCompany(models.Model):
 
 
 class UtilityPayment(models.Model):
-    billID = models.OneToOneField(UtilityCompany, on_delete=models.CASCADE, related_name='bill_ID')
-    billName = models.CharField(max_length=30, verbose_name="Utility Bill Name", default=None)
+    UTILITY_CHOICES = (
+    ('Water Bill','Monthly Water Bill'),
+    ('Gas Bill', 'Monthly Gas Bill'),
+    ('Power Bill', 'Monthly Power Bill')
+    )
+    billID = models.ForeignKey(UtilityCompany, on_delete=models.CASCADE, related_name='bill_ID')
+    billName = models.CharField(max_length=30, verbose_name="Utility Bill Name", choices=UTILITY_CHOICES, default='Water Bill')
     billAmount = models.IntegerField(default=0, verbose_name="Bill Amount")
-    customerName = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
+    customerName = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     paymentDate = models.DateField(verbose_name="Date of Payment", auto_now=True)
     billDescription = models.CharField(verbose_name="Description of Bill to be Paid", max_length=100, default=None)
 
