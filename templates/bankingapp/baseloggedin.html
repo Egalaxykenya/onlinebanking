@@ -54,7 +54,12 @@
             </li>
             <li class="list-group-item d-flex justify-content-between align-items-center">
 
-              <a class="nav-link" href="{% url 'bankingapp:transactions' %}">  View Transactions </a>
+              <a class="nav-link" href="{% url 'bankingapp:fundstransactions' %}">  View Funds Transactions </a>
+
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+
+              <a class="nav-link" href="{% url 'bankingapp:utilitybillstransactions' %}">  View Utility Bills Transactions </a>
 
             </li>
             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -92,6 +97,10 @@
 
         <div class="col-lg-8">
           {% block bodycontent %}
+
+          {% endblock %}
+
+          {% block blockpaginator %}
 
           {% endblock %}
 

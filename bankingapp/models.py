@@ -72,11 +72,6 @@ class FundsTransfer(models.Model):
     transferAccount = models.OneToOneField(UserBankAccount, on_delete=models.CASCADE, related_name="transfer_account", verbose_name="Money Recipient")
     transferDate = models.DateField(verbose_name="Date of Funds Transfer", auto_now=True)
     transferDescription = models.CharField(max_length=200, verbose_name="Funds Transfer Description", default=None)
-    slug = models.SlugField(unique=True)
-
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.transferID)
-        super(FundsTransfer, self).save(*args, **kwargs)
-
+    
     def __str__(self):
         return str(self.transferID)
