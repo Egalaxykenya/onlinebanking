@@ -11,10 +11,11 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+from decouple import config, Csv
 from django.core.urlresolvers import reverse_lazy
 
 #Django authentication environment variables
-LOGIN_REDIRECT_URL = reverse_lazy('apphome')
+LOGIN_REDIRECT_URL = reverse_lazy('Apphome')
 LOGIN_URL = reverse_lazy('login')
 LOGOUT_URL = reverse_lazy ('logout')
 
@@ -31,12 +32,12 @@ MEDIA_URL = '/media/'
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'p8@)nkpp^pgrqha(1@8n^3-$#kbmyoz&a+ob5w&&u8f6bhh$vd'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 
 # Application definition
@@ -91,10 +92,10 @@ WSGI_APPLICATION = 'onlinebanking.wsgi.application'
 DATABASES = {
         'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'onlinebanking',
-        'USER': 'onlinebanking',
-        'PASSWORD': 'this@is##dumb',
-        'HOST' : '',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST' : config('DB_HOST'),
     }
 
 }

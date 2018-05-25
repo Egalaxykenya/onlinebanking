@@ -32,9 +32,9 @@ def index(request):
 
 @login_required
 def Apphome(request):
-     context_dict = {}
 
-     return render(request, 'bankingapp/home.html', context=context_dict)
+
+     return render(request, 'bankingapp/home.html', {'section': 'Apphome'})
 
 @login_required
 def fundstransactions(request):
