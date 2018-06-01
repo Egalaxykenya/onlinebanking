@@ -22,18 +22,16 @@
         </div>
        </div>
        <div class="col-lg-4">
-         <p> You have been successfully logged out </p>
-         <h1> Login </h1>
+         <div class="alert alert-success" role="alert">
 
-         <form action="{% url 'bankingapp:login' %}" method="post">
-           {% csrf_token %}
 
-           {% include 'bankingapp/baseforforms.html' with form=form %}
-           <input type="hidden" name="next" value="{{ next }}" />
+              <p> You have been successfully logged out </p>
 
-             <button type="submit" class="btn btn-primary btn-lg">  Login  </button>
+          </div>
 
-         </form>
+         <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">Log in to onlinebanking </a>
+
+
 
        </div>
      </div>

@@ -1,0 +1,159 @@
+/* Online banking Informal Specifications */
+
+1. The desired functional services: Top Level Module
+  (1) Customer Sign up
+  (2) Operations on Current Account
+  (3) View last number of n transactions
+  (4) Transfer money from own account to another account in the same bank
+  (5) View monthly and annual statements
+  (6) Make payments of power and water utility bills
+  (7) Update profile
+
+2. Decomposition of function (1) in the Top Level Module
+  2.1  Operations
+
+    (1) Register to the system by providing full name, ID number, email address, username and preferred password
+    (2) Complete the registration process by saving the provided details
+
+
+  2.2 Policy on Operations
+    (1) Full name, ID number, email address, username and password must be provided for a successful registration
+    (2) A password and username is mandatory for user log in
+    (3) A user password is stored as a one way hash and salted value of the plain text password
+
+  2.3 Data resources
+
+    (1) Each user can only register for ONE system account
+    (2) The following data items of the user are recorded into the system
+
+     (2.1) Full name
+     (2.2) User national ID number
+     (2.3) Email address
+     (2.4) Account number
+     (2.5) Password
+     (2.6) Username
+
+
+3. Decomposition of function (2) in the Top Level Module
+  3.1 Operations
+
+    (1) Check account balance
+    (2) Check out past transactions
+    (3) Transfer money from current account to another account
+    (4) Generate monthly or annual statements of the current account
+    (5) Pay utility bills from the savings account
+
+  3.2 Policy on Operations
+
+    (1) To perform any of the 5 operations above, user must be logged in by providing the correct username and password registered in the system
+    (2) Maximum amount of money to be transferred in a day is USD 10,000
+    (3) Payments of a utility bill can only be done to utility services companies registered in the system
+    (4) Maximum payment of a utility bill that can be done in a day is USD 1,000
+
+  3.3 Data resources
+
+    (1) Each user has only ONE current account
+    (2) The following data items related to the user are recorded into the system
+
+      (2.1) Full name
+      (2.2) User national ID number
+      (2.3) Email address
+      (2.4) Account number
+      (2.5) Password
+      (2.6) Username
+      (2.7) Transaction amount
+      (2.8) Recipient account number
+
+4. Decomposition of function(3) in the Top Level Module
+
+  4.1 Operations
+
+    (1) Check number of transactions done in past week, month or year through a selection filter /* selection filter allows user to define the parameter for checking past transactions */
+
+        (1.1) Transaction list shows type of transaction i.e money transfer or utility bill payment, date of transaction, time of transaction and transaction amount
+
+  4.2 Policy on Operations
+
+    (1) User cannot view future transactions
+    (2) User can only view their own transactions
+
+  4.3 Data resources
+
+    (1) User account transaction list
+
+5. Decomposition of function (4) in the Top Level Module
+
+  5.1 Operations
+
+   (1) Transfer money to other user account in the same bank
+
+   (2) The user's current account is updated by deducting the transfered amount
+
+  5.2 Policy on Operations
+
+   (1) The maximum amount of each transaction is USD 10,000
+   (2) The recipient account must be available and active
+
+
+  5.3 Data sources
+
+    (1) Current account list
+       (1.1) the following data items need to be recorded, Recipient Account Number, Recipient first name, Recipient second name, transfer amount, date and time of transfer
+
+6. Decomposition of function (5) in the Top Level Module
+
+    6.1 Operations
+
+      (1) Generate monthly or yearly statements of user's account via a selection filter
+          (1.1) Generated statement list shows a record of past transactions with attributes of transaction type i.e money transfer or utility bill payment, date of transaction, time of transaction and transaction amount
+    6.2 Policy on Operations
+
+      (1) User can only generate  statements of their own account
+
+    6.3 Data resources
+
+      (1) User account transaction list
+
+7. Decomposition of function (6) in the Top Level Module
+
+   (7.1) Operations
+
+       (1) Pay utility bills: Water and Power
+
+           (1.1) Payment is done by selecting a utility bill and entering the payment amount
+           (1.2) The user current account is updated by deducting the paid amount
+
+
+
+
+   (7.2) Policy on Operations
+
+       (1) The maximum amount of payment for a utility bill in a day is USD 1,000
+       (2) Payment of utility bills can only be done for utility services companies registered in the system
+
+   (7.3) Data resources
+
+      (1) Current account list
+      (2) Utility bills list
+        (2.1) The following user data items needs to be recorded in the system: Utility company name, utility bill amount, customer name, date of payment
+
+  8. Decomposition of function (7) in the Top Level Module
+
+    (8.1) Operations
+
+        (1) Change password for current account
+        (2) Change user email address
+        (3) Change user phone number
+
+    (8.2) Policy on Operations
+
+        (1) User can only change password, email address and phone number
+        (2) Users changes must be recorded in an activity list.
+
+
+    (8.3) Data resources
+
+        (1) The following data items must be recorded in the user account activity list
+           (1.1) User full name
+           (1.2) User ID number
+           (1.3) Time stamp of the change in user's details

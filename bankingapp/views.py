@@ -5,8 +5,12 @@ from bankingapp.models import UtilityPayment, FundsTransfer, UserProfile, UserBa
 from django.contrib.auth import authenticate, login
 from bankingapp.forms import LoginForm
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse_lazy
+from django.views.generic import RedirectView
 
-
+class HomeView(RedirectView):
+     template_name = 'bankingapp/home.html'
+     url = reverse_lazy('Apphome')
 
 def index(request):
     if request.method == 'POST':

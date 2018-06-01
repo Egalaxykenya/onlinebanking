@@ -1,0 +1,115 @@
+
+/* Online banking semi formal specifications */
+
+module SYSTEM_ONLINEBANKING;
+const
+
+maximum_fundstranfer_day = 10,000;
+maximum_utilitybill_payment_day = 1000;
+
+/* The unit is USD. */
+
+type
+
+CustomerProfile = composed of
+                full_name: CustomerName
+                email_address: string
+                national_id_num: string
+                password: string
+                username: string
+
+
+                end;
+CustomerName = string; /* customer full name */
+
+AccountTransactions = composed of
+              transfer_date: Date
+              transfer_amount: nat0
+              transfer_account: nat0
+              account_balance: nat0
+              transfer_description: string
+              transfer_person: CustomerProfile
+
+              end;
+
+AccountTransfersInf = AccountTransactions
+
+AccountTransfersFile = map CustomerProfile to AccountTransfersInf
+
+UtilityBillPayments = composed of
+                      payment_date: Date
+                      bill_name: string
+                      bill_amount: nat0
+                      customer_name: string
+                      utility_bill_account: nat0
+                      bill_description: string
+
+                      end;
+
+UtilityBillsInf = UtilityBillPayments
+UtilityBillsCustFile = map CustomerProfile to UtilityBillsInf
+
+UtilityBillCompany = composed of
+                    company_name: string
+                    company_accountnum: nat0
+                    company_account_bal: nat0;
+                    company_account_status: bool /* True for Active, False for Disabled */
+
+                    end;
+
+UtilityBillsCompanyFile = map UtilityBillsInf to UtilityBillCompany
+
+
+CurrentAccount = composed of
+                  account_name: CustomerName
+                  account_number: nat0
+                  account_balance: nat0 /* The unit is USD */
+                  account_created: Date
+                  bank_name: string
+                  bank_branch: string
+                  transaction_history: seq AccountTransactions
+                  current_accounts_status: bool /* True for Active, False for Disabled */
+
+                  end;
+
+CurrentAccountInf = CurrentAccount;
+
+CurrentAccountFile = map CustomerProfile to CurrentAccountInf;
+
+
+Date = Day * Month * Year;
+Day = nat0;
+Month = nat0;
+Year = nat0;
+
+var
+
+ext #current_accounts: CurrentAccountFile
+ext #utility_bills_payment_company: UtilityBillsCompanyFile
+ext #utility_bills_payment_customer: UtilityBillsCustFile
+ext #account_transfers: AccountTransfersFile
+
+inv
+
+forall[x: CurrentAccount ] | not exists [y: CurrentAccount ] | x.account_number = y.account_number;
+
+/* Each customer account is unique */
+
+forall [ x, y: AccountTransactions ] | x < > y;
+
+/* All account transfers are different */
+
+forall[x, y: UtilityBillPayments ] | x < > y;
+
+/* All utility bills payments are different */
+
+forall [x: UtilityBillCompany ] | not exists [y: UtilityBillCompany ] | x.company_accountnum = y.company_accountnum => x.company_name <> y.company_name
+
+/* No two companies can have the same utility bills account number as well as same company names */
+
+
+process SignUp(customer_details: CustomerProfile)
+
+end_process;
+
+process FundsTransfer(amount: nat0, )

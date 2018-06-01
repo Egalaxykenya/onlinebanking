@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^bankingapp/', include('bankingapp.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^accounts/', include('django.contrib.auth.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
