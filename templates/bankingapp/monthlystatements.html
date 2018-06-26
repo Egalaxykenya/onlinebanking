@@ -29,23 +29,30 @@
 </div>
 <div class="row">
   <div class="col-lg-12">
-<h2> Monthly Statements </h2>
+<h2> View Account Balance </h2>
 <table class="table table-hover">
     <thead>
       <tr>
         <th scope="col">Account Number</th>
-        <th scope="col">Opening Balance (USD)</th>
-        <th scope="col">Closing balance (USD)</th>
+        <th scope="col">Customer First Name</th>
+        <th scope="col">Customer Last Name</th>
+
+        <th scope="col">Current Balance (USD)</th>
 
       </tr>
     </thead>
     <tbody>
+      {% for bankaccountdetail in bankaccountdetails %}
       <tr class="table-active">
-        <td scope="row">34562221</th>
-        <td> 4000 </td>
-        <td> 1500 </td>
+        <td scope="row">{{ bankaccountdetail.accountNumber }}</td>
+        <td> {{ bankaccountdetail.accountID.first_name }} </td>
+        <td> {{ bankaccountdetail.accountID.last_name }}</td>
+        <td> {{ bankaccountdetail.accountBalance }}</td>
+
 
       </tr>
+
+      {% endfor %}
     </tbody>
   </table>
 </div>

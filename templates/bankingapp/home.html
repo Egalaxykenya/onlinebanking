@@ -9,26 +9,32 @@
       </tr>
     </thead>
     <tbody>
+      {% for userpersonaldetail in userpersonaldetails %}
       <tr class="table-active">
         <th scope="row">Account Holder First Name</th>
-        <td>Busalire</td>
+        <td>{{ userpersonaldetail.first_name }}</td>
       </tr>
       <tr class="table-active">
         <th scope="row">Account Holder Second Name</th>
-        <td>Emeka</td>
+        <td>{{ userpersonaldetail.last_name }}</td>
       </tr>
+      {% endfor %}
+      {% for useraccountdetail in useraccountdetails %}
       <tr class="table-active">
         <th scope="row">Account Type</th>
-        <td>Current Account </td>
+        <td> {{ useraccountdetail.accountType}} </td>
       </tr>
       <tr class="table-active">
         <th scope="row">Account Number</th>
-        <td>112234567</td>
+        <td>{{ useraccountdetail.accountNumber }}</td>
       </tr>
       <tr class="table-success">
         <th scope="row">Current Account Balance</th>
-        <td><b>USD: 40000 </b></td>
+        <td><b>USD: {{ useraccountdetail.accountBalance }} </b></td>
       </tr>
+      {% endfor %}
+
+
     </tbody>
   </table>
 {% endblock %}

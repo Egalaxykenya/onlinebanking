@@ -9,30 +9,34 @@
  <div class="container">
 
       <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-12">
           <div class="jumbotron">
            <h1 class="display-4">XYZ Online Banking App</h1>
 
            <hr class="my-4">
            <p>This portal allows you to conduct most of your banking transactions such funds transfer, utility bills payment, as well as generate a list of all your transactions</p>
-           <p class="lead">
-             <a class="btn btn-primary btn-lg" href="{% url 'bankingapp:signup' %}" role="button">Not registered? Sign Up</a>
-           </p>
+           <div class="row">
+             <div class="col-lg-4">
+
+             <a class="btn btn-primary btn-lg" href="{% url 'registration_register' %}" role="button">Not registered? Sign Up</a>
+
+         </div>
+         <div class="col-lg-4">
+
+             <a class="btn btn-primary btn-lg" href="{% url 'auth_login' %}" role="button">Login</a>
+
+         </div>
+         <div class="col-lg-4">
+
+            
+
+         </div>
+         </div>
+
          </div>
         </div>
-        <div class="col-lg-4">
-          <h1> Login </h1>
 
-          <form action="." method="post">
-            {% csrf_token %}
-
-            {% include 'bankingapp/baseforforms.html' with form=form %}
-
-              <button type="submit" class="btn btn-primary btn-lg">  Login  </button>
-            
-          </form>
-
-        </div>
       </div>
+    </div>
 
 {% endblock %}

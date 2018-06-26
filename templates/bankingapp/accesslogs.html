@@ -9,24 +9,30 @@
     <thead>
       <tr>
         <th scope="col">Date</th>
-        <th scope="col">Time</th>
+
         <th scope="col">Transaction Description</th>
 
       </tr>
     </thead>
     <tbody>
+      {%for transfer in transfers %}
       <tr class="table-active">
-        <td scope="row">20/05/2018</th>
-        <td> 12:00 </td>
-        <td>Funds Transfer to {{ "John" }} - Account Number {{ 111222 }} </td>
+        <td scope="row">{{ transfer.transferDate }}</th>
+
+        <td>Funds Transfer to {{ transfer.transferAccount.accountID.last_name }} - Account Number {{ transfer.transferAccount.accountNumber }} </td>
 
       </tr>
+
+      {% endfor %}
+
+      {% for billpayment in billpayments %}
       <tr class="table-active">
-        <td scope="row">19/05/2018</th>
-        <td> 18:00 </td>
-        <td>Utility bill payment to {{ "Tokyo Gas" }} - Account Number {{ 222222 }} </td>
+        <td scope="row">{{ billpayment.paymentDate }}</th>
+
+        <td>{{billpayment.billDescription }} paid to {{ billpayment.billID.companyName }} Account Number {{ billpayment.billID.companyAccountNum }} </td>
 
       </tr>
+      {% endfor %}
     </tbody>
   </table>
 </div>
@@ -34,30 +40,6 @@
 
 {% endblock %}
 {% block blockpaginator %}
-<div>
-  <ul class="pagination pagination-lg">
-      <li class="page-item disabled">
-        <a class="page-link" href="#">&laquo;</a>
-      </li>
-      <li class="page-item active">
-        <a class="page-link" href="#">1</a>
-      </li>
-      <li class="page-item">
-        <a class="page-link" href="#">2</a>
-      </li>
-      <li class="page-item">
-        <a class="page-link" href="#">3</a>
-      </li>
-      <li class="page-item">
-        <a class="page-link" href="#">4</a>
-      </li>
-      <li class="page-item">
-        <a class="page-link" href="#">5</a>
-      </li>
-      <li class="page-item">
-        <a class="page-link" href="#">&raquo;</a>
-      </li>
-    </ul>
-  </div>
+{% include "bankingapp/pagination.html" with page=logs %}
 
 {% endblock %}

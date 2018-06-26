@@ -22,7 +22,7 @@ class FundsTransferAdmin(admin.ModelAdmin):
     list_display = ('transferID','transferAmount','transferAccount','transferDate','transferDescription')
     search_fields = ('transferAccount__accountID__first_name','transferAccount__accountID__last_name',)
     #note the chaining in the search because of the relationship between receipient and his bank account
-    
+
 
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(UserBankAccount, UserBankAccountAdmin)

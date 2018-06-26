@@ -1,0 +1,232 @@
+
+/* Online banking Formal Abstract Design Specifications  */
+
+module SYSTEM_ONLINEBANKING;
+const
+
+maximum_fundstranfer_day = 10,000;
+maximum_utilitybill_payment_day = 1000;
+
+/* The unit is USD. */
+
+type
+
+CustomerProfile = composed of
+                full_name: CustomerName
+                email_address: string
+                national_id_num: string
+                password: string
+                username: string
+
+                end;
+CustomerName = string; /* customer full name */
+
+AccountTransactions = composed of
+              transfer_date: Date
+              transfer_amount: nat0
+              transfer_account_num: nat0
+              transfer_description: string
+              transfer_person: CustomerProfile
+
+              end;
+
+
+AccountTransfersFile = map CustomerProfile to AccountTransactions
+
+UtilityBillPayments = composed of
+                      payment_date: Date
+                      bill_name: string
+                      bill_amount: nat0
+                      customer_name: string
+                      utility_bill_account: nat0
+                      bill_description: string
+
+                      end;
+
+
+UtilityBillsCustFile = map CustomerProfile to UtilityBillPayments;
+
+UtilityBillCompany = composed of
+                    company_name: string
+                    company_accountnum: nat0
+                    company_account_bal: nat0;
+                    company_account_status: bool /* True for Active, False for Disabled */
+
+                    end;
+
+UtilityBillsCompanyFile = map UtilityBillPayments to UtilityBillCompany
+
+
+CurrentAccount = composed of
+                  account_name: CustomerName
+                  account_number: nat0
+                  account_balance: nat0 /* The unit is USD */
+                  account_created: Date
+                  bank_name: string
+                  bank_branch: string
+                  transaction_history: seq AccountTransactions
+                  current_accounts_status: bool /* True for Active, False for Disabled */
+
+                  end;
+
+
+
+CurrentAccountFile = map CustomerProfile to CurrentAccount;
+
+
+Date = Day * Month * Year;
+Day = nat0;
+Month = nat0;
+Year = nat0;
+
+var
+
+ext #customer_details: set of CustomerProfile
+ext #current_accounts: set of CurrentAccountFile;
+ext #utility_bills_payment_company: seq of UtilityBillsCompanyFile;
+ext #utility_bills_payment_customer:seq of UtilityBillsCustFile
+ext #account_transfers: seq of AccountTransfersFile;
+ext #today: Date;
+/* The variable today reflect the date of today in calender */
+
+inv
+
+forall[x: CurrentAccount ] | not exists [y: CurrentAccount ] | x.account_number = y.account_number;
+/* Each customer account is unique */
+forall[ x: CustomerProfile ] | not exists [y: CustomerProfile ] |
+        x.email_address = y.email_address => x.national_id_num < > y.national_id_num
+/* Each customer has a unique email address and national ID number and each custoer profile is unique */
+
+
+
+forall [ x, y: AccountTransactions ] | x < > y;
+
+/* All account transfers are different */
+
+forall[x, y: UtilityBillPayments ] | x < > y;
+
+/* All utility bills payments are different */
+
+forall [x: UtilityBillCompany ] | not exists [y: UtilityBillCompany ]
+        | x.company_accountnum = y.company_accountnum => x.company_name <> y.company_name
+
+/* No two companies can have the same utility bills account number as well as same company names */
+
+
+
+process SignUp(customer_info: CustomerProfile) signup_complete:sign
+                | error_message: string
+
+ext wr customer_details
+
+
+pre customer_info notin customer_details and  not exists[x:CustomerProfile]
+          | x.email_address = get(customer_details).email_address and x.national_id_num =
+            get(customer_details).national_id_num
+
+Comment
+ Each customer profile is unique and each customer profile has a unique email
+ address and national identification number
+
+post if bound(signup_complete)
+      then customer_details = union(~customer_details, {customer_info})
+      else error_message = "Either the provided email or National ID number already exists in customer records"
+
+end_process;
+
+process SignIn(username: String, password: String) login_success: sign | login_error: String
+
+ext rd current_accounts
+
+pre exists![i:CurrentAccountFile] | i inset current_accounts and dom(i).username = username
+              and dom(i).password = password
+
+
+post if bound(login_success)
+        then exists![ i:CurrentAccountFile ] | i inset current_accounts and dom(i).username = username
+         and dom(i).password = password
+      else login_error = " Provided username and password do not match"
+
+end_process;
+
+
+process FundsTransfer(amount: nat0, sender:CurrentAccountFile, transfer_from_account: CurrentAccount,
+                      receiver: CurrentAccountFile, receiver_account: CurrentAccount, transfer_desc: String, transfer_day: Date)
+                          funds_sent: sign and transaction: AccountTransactions | error_msg: string
+ext wr current_accounts
+ext wr account_transfers
+
+pre receiver = get(current_accounts) and receiver_account inset rng(receiver)
+                    and  receiver_account.current_accounts_status = True and sender = get(current_accounts)
+                      and transfer_from_account inset rng(sender) and amount < transfer_from_account.account_balance
+
+post if bound(funds_sent)
+          then sender = get(current_accounts) and transfer_from_account inset rng(sender)
+            and transfer_from_account.account_balance = ~ transfer_from_account.account_balance - amount
+              and receiver = get(current_accounts) and receiver_account inset rng(receiver)
+                and receiver_account.account_balance = ~receiver_account.account_balance + amount
+                 and current_accounts = union(~current_accounts, { receiver } )
+                  and current_accounts = union(~current_accounts, { sender })
+                   and transaction = mk_AccountTransactions(transfer_day, amount, receiver_account.account_number, transfer_desc, dom(sender))
+                    and account_transfers = conc(~account_transfers, [ map dom(sender) to transaction ])
+      else error_msg = "Recipient does not exists or its in active " |
+          error_msg = "Amount to be sent is greater than current balance"
+
+comment
+
+In the post condition, the details of the sender account are retrieved from current_accounts records and amount to be sent
+deducted from its account balance. The details of the receiver account are also retrieved from current_accounts records
+and amount sent is added to the receiver  account balance. The current_accounts and account_transfers records are then updated
+The updating of the account_transfers records is done by first constructing an object transaction of composite type then
+generating a map, to map the sender with the transaction. The map is then concatenated with other existing account_transfers
+
+end_process;
+
+process BillPayment( bill: nat0, receiving_company: UtilityBillsCompanyFile,
+                    payment_account: UtilityBillCompany, customer_account: CurrentAccount
+                    customer: CurrentAccountFile) bill_paid: sign | error_msg: string
+
+ext wr current_accounts
+ext wr utility_bills_payment_company
+ext wr utility_bills_payment_customer
+
+pre exists![i: inds(utility_bills_payment_company)] | payment_account inset
+          rng(utility_bills_payment_company(i)) and payment_account.company_account_status = True
+            and customer = get(current_accounts)
+              and customer_account inset rng(customer)
+                and bill < customer_account.account_balance
+
+post if bound(bill_paid)
+            then customer = get(current_accounts)
+              and customer_account inset rng(customer)
+                and customer_account.account_balance = ~ customer_account.account_balance - bill
+                  and exists![i: inds(utility_bills_payment_company)] |
+                   utility_bills_payment_company(i) = receiving_company
+                    and payment_account inset rng(utility_bills_payment_company(i))
+                      and payment_account.company_account_status = True
+                       and payment_account.account_balance = ~ payment_account.account_balance + bill
+                         and utility_bills_payment_company = conc(~utility_bills_payment_company, [receiving_company])
+                           and utility_bills_payment_customer = conc(~utility_bills_payment_customer, [customer])
+                      else error_msg = " Payment account does not exist or its disabled" |
+                           error_msg = " Bill amount is higher than current account balance"
+
+Comment
+The bill amount is deducted from customer Account and bill amount is
+added to company payment_account initial value; and utility_bills_payment_company
+and utility_bills_payment_customer record files are updated else output an error message
+
+end_process;
+
+process CheckBalance( account_num: nat0 ) bal: real | error_msg: string
+
+ext rd current_accounts
+
+pre exists![ i: CurrentAccountFile ] | i inset current_accounts and rng(i).account_number = account_num
+
+post if exists![ i: CurrentAccountFile ] | i inset current_accounts and rng(i).account_number = account_num
+        then bal = rng(i).account_balance
+     else error_msg = "Provided Account Number does not exist or account number does not belong to the user"
+
+end_process;
+
+end_module;

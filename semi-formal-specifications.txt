@@ -26,7 +26,6 @@ AccountTransactions = composed of
               transfer_date: Date
               transfer_amount: nat0
               transfer_account: nat0
-              account_balance: nat0
               transfer_description: string
               transfer_person: CustomerProfile
 
@@ -84,16 +83,22 @@ Year = nat0;
 
 var
 
-ext #current_accounts: CurrentAccountFile
-ext #utility_bills_payment_company: UtilityBillsCompanyFile
-ext #utility_bills_payment_customer: UtilityBillsCustFile
-ext #account_transfers: AccountTransfersFile
+ext #customer_details: set of CustomerProfile
+ext #current_accounts: set CurrentAccountFile;
+ext #utility_bills_payment_company: seq of UtilityBillsCompanyFile;
+ext #utility_bills_payment_customer: seq of UtilityBillsCustFile
+ext #account_transfers: seq of AccountTransfersFile;
+ext #today: Date;
+/* The variable today reflect the date of today in calender */
 
 inv
 
 forall[x: CurrentAccount ] | not exists [y: CurrentAccount ] | x.account_number = y.account_number;
 
 /* Each customer account is unique */
+forall[ x: CustomerProfile ] | not exists [y: CustomerProfile ] |
+        x.email_address = y.email_address => x.national_id_num < > y.national_id_num
+/* Each customer has a unique email address and national ID number  and each customer profile is unique*/
 
 forall [ x, y: AccountTransactions ] | x < > y;
 
@@ -103,13 +108,84 @@ forall[x, y: UtilityBillPayments ] | x < > y;
 
 /* All utility bills payments are different */
 
-forall [x: UtilityBillCompany ] | not exists [y: UtilityBillCompany ] | x.company_accountnum = y.company_accountnum => x.company_name <> y.company_name
+forall [x: UtilityBillCompany ] | not exists [y: UtilityBillCompany ]
+        | x.company_accountnum = y.company_accountnum => x.company_name <> y.company_name
 
 /* No two companies can have the same utility bills account number as well as same company names */
 
 
-process SignUp(customer_details: CustomerProfile)
+process SignUp(customer_info: CustomerProfile) signup_complete:sign
+                | error_message: string
+
+ext wr customer_details
+
+
+
+post if the inputs customer_info.email_address and customer_info.national_id_num
+    match those of a customer profile stored in customer_details
+    then output an error message
+    else save customer_info in customer_details
 
 end_process;
 
-process FundsTransfer(amount: nat0, )
+process SignIn(username: String, password: String) login_success: sign | login_error: String
+
+ext rd current_accounts
+
+pre username and password inputs must exist in current_accounts records
+
+post if provided username and password exist in current_accounts then login user
+      else deny user login
+
+end_process;
+
+
+process FundsTransfer(amount: nat0, sender:CustomerProfile, transfer_from_account: CurrentAccount,
+                      receiver: CustomerProfile, receiver_account: CurrentAccount)
+                          funds_sent: sign | error_msg: string
+ext wr current_accounts
+ext wr account_transfers
+
+pre the recipient account should exist and  be active and the requested amount for transfer
+    should be lower than current balance of the sender
+
+post if the receiver_account exists and its status is active and current balance of sender account
+      is higher than amount to be sent
+      then amount is deducted from sender account and added to recipient account
+        and current_accounts and account_transfers external record files are updated
+      else output an error message
+
+end_process;
+
+process BillPayment( bill: nat0, receiving_company: UtilityBillsCompanyFile,
+                    payment_account: UtilityBillCompany, customer_account: CurrentAccount
+                    customer: CurrentAccountFile) bill_paid: sign | error_msg: string
+
+ext wr current_accounts
+ext wr utility_bills_payment_company
+ext wr utility_bills_payment_customer
+
+pre the utility bill company account should exist and should be active and bill
+      should be less than the current account balance of payee
+
+post if bill_paid signal
+        then bill amount is deducted from payee Account and bill amount is
+          added to company payment_account initial value; and utility_bills_payment_company
+          and utility_bills_payment_customer record files are updated
+        else output an error message
+
+end_process;
+
+process CheckBalance( account_num: nat0 ) bal: real | error_msg: string
+
+ext rd current_accounts
+
+pre the provided account_num must exist in the file current_accounts and the account_num must belong to the user
+
+post if the provided account_num exists in the current_accounts records and the account_num belongs to the user
+       then show current account balance of user
+     else output an error message.
+
+end_process;
+
+end_module;

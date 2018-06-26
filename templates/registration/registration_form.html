@@ -1,3 +1,4 @@
+
 {% extends 'bankingapp/base.html'%}
 
 {% block navabar %}
@@ -16,19 +17,19 @@
            <hr class="my-4">
            <p>This portal allows you to conduct most of your banking transactions such funds transfer, utility bills payment, as well as generate a list of all your transactions</p>
            <p class="lead">
-             <a class="btn btn-primary btn-lg" href="{% url 'registration_register' %}" role="button">Not registered? Sign Up</a>
+             <a class="btn btn-primary btn-lg" href="{% url 'auth_login' %}" role="button">Already registered? Login</a>
            </p>
          </div>
         </div>
         <div class="col-lg-4">
-          <h1> Login </h1>
+          <h1> Register Here </h1>
 
           <form action="." method="post">
             {% csrf_token %}
 
             {% include 'bankingapp/baseforforms.html' with form=form %}
 
-              <button type="submit" class="btn btn-primary btn-lg">  Login  </button>
+              <button type="submit" class="btn btn-primary btn-lg">  Register  </button>
 
           </form>
 
