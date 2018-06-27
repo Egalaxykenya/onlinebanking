@@ -86,8 +86,6 @@ ext #current_accounts: set of CurrentAccountFile;
 ext #utility_bills_payment_company: seq of UtilityBillsCompanyFile;
 ext #utility_bills_payment_customer:seq of UtilityBillsCustFile
 ext #account_transfers: seq of AccountTransfersFile;
-ext #today: Date;
-/* The variable today reflect the date of today in calender */
 
 inv
 

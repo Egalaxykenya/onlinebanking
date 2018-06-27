@@ -3,8 +3,9 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from bankingapp.models import UtilityPayment, FundsTransfer, UserProfile, UserBankAccount
 from django.contrib.auth import authenticate, login
-from bankingapp.forms import LoginForm
+from bankingapp.forms import LoginForm, FundsTransferForm
 from django.contrib.auth.decorators import login_required
+
 
 #paginator combiner imports
 from itertools import chain
@@ -140,7 +141,17 @@ def fundstransfer(request):
         context_dict = {'loggeduser':loggeduser, 'firstname': request.user.first_name, 'lastname': request.user.last_name}
         return render(request, 'bankingapp/admininfo.html', context=context_dict)
     else:
-        context_dict = {'loggeduser': loggeduser }
+        form = FundsTransferForm()
+        # A HTTP POST?
+        if request.method == 'POST':
+            form = FundsTransferForm(request.POST)
+            # check for valid form inputs
+            if form.is_valid():
+                form.save(commit=True)
+                return fundstransfer(request)
+            else:
+                print(form.errors)
+        context_dict = {'loggeduser': loggeduser , 'form': form }
 
 
         return render(request, 'bankingapp/fundstransfer.html', context=context_dict)
@@ -173,12 +184,12 @@ def updateprofile(request):
 def accesslogs(request):
     loggeduser, userid, isadmin = getuser(request)
     if isadmin:
-        
+
         fundstransfers = FundsTransfer.objects.all()
         utilitybills = UtilityPayment.objects.all()
         # combine fundstransfers and utilitybills querysets into a single list for pagination
         combinedlogs = list(chain(fundstransfers, utilitybills))
-        combinedlogspaginator = Paginator(combinedlogs, 2)
+        combinedlogspaginator = Paginator(combinedlogs, 10)
 
         page = request.GET.get('page')
         try:
@@ -193,6 +204,19 @@ def accesslogs(request):
     else:
         fundstransfers = FundsTransfer.objects.filter(transferID=userid)
         utilitybills = UtilityPayment.objects.filter(customerName=userid)
+        combinedlogs = list(chain(fundstransfers, utilitybills))
+        combinedlogspaginator = Paginator(combinedlogs, 10)
+
+        page = request.GET.get('page')
+        try:
+            logs = combinedlogspaginator.page(page)
+        except PageNotAnInteger:
+            # if page is not an integer deliver the first page
+            logs = combinedlogspaginator.page(1)
+        except EmptyPage:
+            # if page is out of range deliver last page of the results
+            logs = combinedlogspaginator.page(paginator.num_pages)
+
 
 
     context_dict = {'loggeduser':loggeduser,  'transfers':fundstransfers, 'billpayments':utilitybills, 'logs':logs, 'page':page }

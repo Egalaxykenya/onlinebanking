@@ -67,11 +67,14 @@ class UtilityPayment(models.Model):
         return self.billName
 
 class FundsTransfer(models.Model):
+    TRANSFER_CHOICES = (
+    ('Funds Transfer', 'Funds Transfer'),
+    )
     transferID = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name="Money Sender")
     transferAmount = models.IntegerField(verbose_name="Amount to transfer", default=0)
     transferAccount = models.OneToOneField(UserBankAccount, on_delete=models.CASCADE, related_name="transfer_account", verbose_name="Money Recipient")
     transferDate = models.DateField(verbose_name="Date of Funds Transfer", auto_now=True)
-    transferDescription = models.CharField(max_length=200, verbose_name="Funds Transfer Description", default=None)
-    
+    transferDescription = models.CharField(max_length=200, verbose_name="Funds Transfer Description", choices=TRANSFER_CHOICES, default='Funds Transfer')
+
     def __str__(self):
         return str(self.transferID)
