@@ -6,8 +6,12 @@ const
 
 maximum_fundstranfer_day = 10,000;
 maximum_utilitybill_payment_day = 1000;
-
 /* The unit is USD. */
+update_log = "Transaction log successfully updated"
+paid_bill = " Bill Paid Successfully"
+/* Predefined transaction log messages */
+
+
 
 type
 
@@ -86,6 +90,8 @@ ext #current_accounts: set of CurrentAccountFile;
 ext #utility_bills_payment_company: seq of UtilityBillsCompanyFile;
 ext #utility_bills_payment_customer:seq of UtilityBillsCustFile
 ext #account_transfers: seq of AccountTransfersFile;
+ext #output_device: seq of String;
+
 
 inv
 
@@ -110,7 +116,7 @@ forall [x: UtilityBillCompany ] | not exists [y: UtilityBillCompany ]
 
 /* No two companies can have the same utility bills account number as well as same company names */
 
-
+behav CDFD_2;
 
 process SignUp(customer_info: CustomerProfile) signup_complete:sign
                 | error_message: string
@@ -150,9 +156,9 @@ end_process;
 
 process FundsTransfer(amount: nat0, sender:CurrentAccountFile, transfer_from_account: CurrentAccount,
                       receiver: CurrentAccountFile, receiver_account: CurrentAccount, transfer_desc: String, transfer_day: Date)
-                          funds_sent: sign and transaction: AccountTransactions | error_msg: string
+                          funds_sent: string, transaction: AccountTransactions, sender_rc: CurrentAccountFile | ft_error_msg: string
 ext wr current_accounts
-ext wr account_transfers
+
 
 pre receiver = get(current_accounts) and receiver_account inset rng(receiver)
                     and  receiver_account.current_accounts_status = True and sender = get(current_accounts)
@@ -166,23 +172,22 @@ post if bound(funds_sent)
                  and current_accounts = union(~current_accounts, { receiver } )
                   and current_accounts = union(~current_accounts, { sender })
                    and transaction = mk_AccountTransactions(transfer_day, amount, receiver_account.account_number, transfer_desc, dom(sender))
-                    and account_transfers = conc(~account_transfers, [ map dom(sender) to transaction ])
-      else error_msg = "Recipient does not exists or its in active " |
-          error_msg = "Amount to be sent is greater than current balance"
+
+      else ft_error_msg = "Recipient does not exists or its in active " |
+          ft_error_msg = "Amount to be sent is greater than current balance"
 
 comment
 
 In the post condition, the details of the sender account are retrieved from current_accounts records and amount to be sent
 deducted from its account balance. The details of the receiver account are also retrieved from current_accounts records
-and amount sent is added to the receiver  account balance. The current_accounts and account_transfers records are then updated
-The updating of the account_transfers records is done by first constructing an object transaction of composite type then
-generating a map, to map the sender with the transaction. The map is then concatenated with other existing account_transfers
+and amount sent is added to the receiver  account balance. The current_accounts is then updated
+
 
 end_process;
 
 process BillPayment( bill: nat0, receiving_company: UtilityBillsCompanyFile,
                     payment_account: UtilityBillCompany, customer_account: CurrentAccount
-                    customer: CurrentAccountFile) bill_paid: sign | error_msg: string
+                    customer: CurrentAccountFile) bill_paid: string | bill_error_msg: string
 
 ext wr current_accounts
 ext wr utility_bills_payment_company
@@ -205,8 +210,8 @@ post if bound(bill_paid)
                        and payment_account.account_balance = ~ payment_account.account_balance + bill
                          and utility_bills_payment_company = conc(~utility_bills_payment_company, [receiving_company])
                            and utility_bills_payment_customer = conc(~utility_bills_payment_customer, [customer])
-                      else error_msg = " Payment account does not exist or its disabled" |
-                           error_msg = " Bill amount is higher than current account balance"
+                      else bill_error_msg = " Payment account does not exist or its disabled" |
+                           bill_error_msg = " Bill amount is higher than current account balance"
 
 Comment
 The bill amount is deducted from customer Account and bill amount is
@@ -215,15 +220,79 @@ and utility_bills_payment_customer record files are updated else output an error
 
 end_process;
 
-process CheckBalance( account_num: nat0 ) bal: real | error_msg: string
+process CheckBalance( account_num: nat0 ) bal: real | cb_error_msg: string
 
 ext rd current_accounts
 
 pre exists![ i: CurrentAccountFile ] | i inset current_accounts and rng(i).account_number = account_num
 
-post if exists![ i: CurrentAccountFile ] | i inset current_accounts and rng(i).account_number = account_num
+post
+explicit
+ if exists![ i: CurrentAccountFile ] | i inset current_accounts and rng(i).account_number = account_num
         then bal = rng(i).account_balance
-     else error_msg = "Provided Account Number does not exist or account number does not belong to the user"
+     else cb_error_msg = "Provided Account Number does not exist or account number does not belong to the user"
+
+end_process;
+
+process RecordTransfers( transaction: AccountTransactions, sender_rc: CurrentAccountFile, funds_sent: sign)
+                        Record_success: string | rt_error_msg: string
+ext rd current_accounts
+ext wr account_transfers
+
+post
+explicit
+ if bound(Record_success)
+        then sender_rc = get(current_accounts) and account_transfers = conc(~account_transfers, [ map dom(sender_rc) to transaction])
+            and Record_success = update_log
+        else rt_error_msg = " Error in writing transaction log "
+
+Comment
+
+The updating of the account_transfers records is done by a composite object transaction, yielded by process FundsTransfer then
+generating a map, to map the sender with the transaction. The map is then concatenated with other existing account_transfers
+
+
+end_process;
+
+process OutputMessage(bill_paid, bill_error_msg, ft_error_msg, bal, cb_error_msg
+                      rt_error_msg, Record_success: string)
+ext wr output_device
+
+post bound(bill_paid) and bill_paid := paid_bill and
+        output_device = conc(~output_device, [bill_paid]) or
+     bound(bill_error_msg) and
+        output_device = conc(~output_device, [bill_error_msg]) or
+     bound(ft_error_msg) and
+        output_device = conc(~output_device, [ft_error_msg]) or
+     bound(bal) and
+        output_device = conc(~output_device, [bal]) or
+     bound(cb_error_msg) and
+        output_device = conc(~output_device, [cb_error_msg]) or
+     bound(rt_error_msg) and
+        output_device = conc(~output_device, [rt_error_msg]) or
+     bound(Record_success) and Record_success := update_log
+        output_device = conc(~output_device, [Record_success])
+
+explicit
+
+  if bound(bill_paid)
+    then bill_paid := paid_bill and output_device = conc(~output_device, [bill_paid])
+  else if bound(bill_error_msg)
+    then output_device = conc(~output_device, [bill_error_msg])
+  else if bound(ft_error_msg)
+    then output_device = conc(~output_device, [ft_error_msg])
+  else if bound(bal)
+    then output_device = conc(~output_device, [bal])
+  else if bound(cb_error_msg)
+    then output_device = conc(~output_device, [cb_error_msg])
+  else if bound(rt_error_msg)
+    then output_device = conc(~output_device, [rt_error_msg])
+  else
+    Record_success := update_log and output_device = conc(~output_device, [Record_success])
+
+Comment
+
+Display the input data flows onto the output device based on their availability
 
 end_process;
 

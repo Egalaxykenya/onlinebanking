@@ -9,6 +9,11 @@ maximum_utilitybill_payment_day = 1000;
 
 /* The unit is USD. */
 
+update_log = "Transaction log successfully updated"
+paid_bill = " Bill Paid Successfully"
+/* Predefined transaction log messages */
+
+
 type
 
 CustomerProfile = composed of
@@ -18,22 +23,20 @@ CustomerProfile = composed of
                 password: string
                 username: string
 
-
                 end;
 CustomerName = string; /* customer full name */
 
 AccountTransactions = composed of
               transfer_date: Date
               transfer_amount: nat0
-              transfer_account: nat0
+              transfer_account_num: nat0
               transfer_description: string
               transfer_person: CustomerProfile
 
               end;
 
-AccountTransfersInf = AccountTransactions
 
-AccountTransfersFile = map CustomerProfile to AccountTransfersInf
+AccountTransfersFile = map CustomerProfile to AccountTransactions
 
 UtilityBillPayments = composed of
                       payment_date: Date
@@ -45,8 +48,8 @@ UtilityBillPayments = composed of
 
                       end;
 
-UtilityBillsInf = UtilityBillPayments
-UtilityBillsCustFile = map CustomerProfile to UtilityBillsInf
+
+UtilityBillsCustFile = map CustomerProfile to UtilityBillPayments;
 
 UtilityBillCompany = composed of
                     company_name: string
@@ -56,7 +59,7 @@ UtilityBillCompany = composed of
 
                     end;
 
-UtilityBillsCompanyFile = map UtilityBillsInf to UtilityBillCompany
+UtilityBillsCompanyFile = map UtilityBillPayments to UtilityBillCompany
 
 
 CurrentAccount = composed of
@@ -71,9 +74,9 @@ CurrentAccount = composed of
 
                   end;
 
-CurrentAccountInf = CurrentAccount;
 
-CurrentAccountFile = map CustomerProfile to CurrentAccountInf;
+
+CurrentAccountFile = map CustomerProfile to CurrentAccount;
 
 
 Date = Day * Month * Year;
@@ -84,11 +87,11 @@ Year = nat0;
 var
 
 ext #customer_details: set of CustomerProfile
-ext #current_accounts: set CurrentAccountFile;
+ext #current_accounts: set of CurrentAccountFile;
 ext #utility_bills_payment_company: seq of UtilityBillsCompanyFile;
-ext #utility_bills_payment_customer: seq of UtilityBillsCustFile
+ext #utility_bills_payment_customer:seq of UtilityBillsCustFile
 ext #account_transfers: seq of AccountTransfersFile;
-
+ext #output_device: seq of String;
 
 inv
 
@@ -112,12 +115,13 @@ forall [x: UtilityBillCompany ] | not exists [y: UtilityBillCompany ]
 
 /* No two companies can have the same utility bills account number as well as same company names */
 
+behave CDFD_2;
+
 
 process SignUp(customer_info: CustomerProfile) signup_complete:sign
                 | error_message: string
 
 ext wr customer_details
-
 
 
 post if the inputs customer_info.email_address and customer_info.national_id_num
@@ -139,11 +143,11 @@ post if provided username and password exist in current_accounts then login user
 end_process;
 
 
-process FundsTransfer(amount: nat0, sender:CustomerProfile, transfer_from_account: CurrentAccount,
-                      receiver: CustomerProfile, receiver_account: CurrentAccount)
-                          funds_sent: sign | error_msg: string
+process FundsTransfer(amount: nat0, sender:CurrentAccountFile, transfer_from_account: CurrentAccount,
+                      receiver: CurrentAccountFile, receiver_account: CurrentAccount, transfer_desc: String, transfer_day: Date)
+                          funds_sent: string, transaction: AccountTransactions, sender_rc: CurrentAccountFile | ft_error_msg: string
 ext wr current_accounts
-ext wr account_transfers
+
 
 pre the recipient account should exist and  be active and the requested amount for transfer
     should be lower than current balance of the sender
@@ -151,15 +155,14 @@ pre the recipient account should exist and  be active and the requested amount f
 post if the receiver_account exists and its status is active and current balance of sender account
       is higher than amount to be sent
       then amount is deducted from sender account and added to recipient account
-        and current_accounts and account_transfers external record files are updated
+        and current_accounts is updated
       else output an error message
 
 end_process;
 
 process BillPayment( bill: nat0, receiving_company: UtilityBillsCompanyFile,
                     payment_account: UtilityBillCompany, customer_account: CurrentAccount
-                    customer: CurrentAccountFile) bill_paid: sign | error_msg: string
-
+                    customer: CurrentAccountFile) bill_paid: string | bill_error_msg: string
 ext wr current_accounts
 ext wr utility_bills_payment_company
 ext wr utility_bills_payment_customer
@@ -175,7 +178,7 @@ post if bill_paid signal
 
 end_process;
 
-process CheckBalance( account_num: nat0 ) bal: real | error_msg: string
+process CheckBalance( account_num: nat0 ) bal: real | cb_error_msg: string
 
 ext rd current_accounts
 
@@ -185,6 +188,32 @@ post if the provided account_num exists in the current_accounts records and the 
        then show current account balance of user
      else output an error message.
 
+end_process;
+
+process RecordTransfers( transaction: AccountTransactions, sender_rc: CurrentAccountFile, funds_sent: sign)
+                        Record_success: string | rt_error_msg: string
+ext rd current_accounts
+ext wr account_transfers
+
+pre true
+
+post get profile of the sender, map it with the funds transfer executed and record
+      the mapping in account_transfers files.
+
+
+end_process;
+
+process OutputMessage(bill_paid, bill_error_msg, ft_error_msg, bal, cb_error_msg
+                      rt_error_msg, Record_success: string)
+ext wr output_device
+
+post print bill_paid message or
+      print bill_error_msg or
+        print ft_error_msg of
+          print bal or
+            print cb_error_msg or
+              rt_error_msg or
+                print Record_success
 end_process;
 
 end_module;
